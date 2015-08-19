@@ -14,7 +14,7 @@ To comment out a line start it with two forward slashes.
 
 config.txt
 
-This is where you'll put your config settings, all entries are "option setting". Currently supports debug, background, and backgroundcolor which are bool, bool, hex triplet respectively.
+This is where you'll put your config settings, all entries are "option setting". Currently supports debug, background, and backgroundcolor which are bool, bool, and hex triplet respectively.
 
     debug true
     background false
