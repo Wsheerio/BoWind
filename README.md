@@ -23,7 +23,7 @@ programs.txt
 This is where you'll put your program settings, all entries are "aspect ratio width:aspect ratio height:option/setting". Currently supported options are c, n, and s which are compatibility mode (bool), process name, and shift (x,y,w,h) respectively. Compatibility mode grabs all related processes and resizes those instead of just the mainwindowhandle, this helps with some games but you'll probably never need to use it. Shift moves the application x pixels left and y pixels up and increases the width by w and height by h.
 
     16:9:n DarkSoulsII.s 2,2,4,4:n RustClient:n DOMO
-    632:473:c true.n endless.b 25
+    632:473:c true.n endless.s 0,25,0,25
     
 Debug Menu
 
