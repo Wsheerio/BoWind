@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows;
+using System.Linq;
 using System.Text;
 using System.IO;
 using System;
@@ -24,7 +25,7 @@ namespace BoWind
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
         static Dictionary<string, string> config = new Dictionary<string, string>();
-        static Dictionary<double, Dictionary<string, Dictionary<char, string>>> programs = new Dictionary<double, Dictionary<string, Dictionary<char, string>>>();
+        static Dictionary<double, List<Dictionary<char, string>>> programs = new Dictionary<double, List<Dictionary<char, string>>>();
         static void Main(string[] args)
         {
             if (!File.Exists("config.txt"))
@@ -52,12 +53,13 @@ namespace BoWind
                 Thread.Sleep(1000);
                 foreach (Process process in Process.GetProcesses())
                 {
-                    foreach (KeyValuePair<double, Dictionary<string, Dictionary<char, string>>> item in programs)
+                    foreach (KeyValuePair<double, List<Dictionary<char, string>>> item in programs)
                     {
-                        foreach (KeyValuePair<string, Dictionary<char, string>> proc in item.Value)
+                        foreach (Dictionary<char, string> value in item.Value)
                         {
-                            if (process.ProcessName == proc.Key)
+                            if (process.ProcessName == value['n'])
                             {
+                                string[] temp = value['s'].Split(',');
                                 if (item.Key >= monitorWidth / monitorHeight)
                                 {
                                     width = monitorWidth;
@@ -68,7 +70,7 @@ namespace BoWind
                                     width = monitorHeight * item.Key;
                                     height = monitorHeight;
                                 }
-                                if (proc.Value['c'] == "true")
+                                if (value['c'] == "true")
                                 {
                                     uint compareA;
                                     uint compareB;
@@ -97,7 +99,7 @@ namespace BoWind
                                             if (stringBuilder.ToString() != "" && stringBuilder.ToString() != "Default IME" && stringBuilder.ToString() != "MSCTFIME UI")
                                             {
                                                 SetWindowLong(hand, -16, 0x0008 | 0x00C);
-                                                SetWindowPos(hand, 0, Convert.ToInt16(monitorWidth / 2 - width / 2), Convert.ToInt16(monitorHeight / 2 - height / 2) - Convert.ToInt16(proc.Value['b']), Convert.ToInt16(width), Convert.ToInt16(height) + Convert.ToInt16(proc.Value['b']), 0x0400);
+                                                SetWindowPos(hand, 0, Convert.ToInt16(monitorWidth / 2 - width / 2 - Convert.ToInt16(temp[0])), Convert.ToInt16(monitorHeight / 2 - height / 2 - Convert.ToInt16(temp[1])), Convert.ToInt16(width) + Convert.ToInt16(temp[2]), Convert.ToInt16(height) + Convert.ToInt16(temp[3]), 0x0400);
                                                 ShowWindow(hand, 5);
                                                 if (config["debug"] == "true")
                                                 {
@@ -110,7 +112,7 @@ namespace BoWind
                                 else
                                 {
                                     SetWindowLong(process.MainWindowHandle, -16, 0x0008 | 0x00C);
-                                    SetWindowPos(process.MainWindowHandle, 0, Convert.ToInt16(monitorWidth / 2 - width / 2), Convert.ToInt16(monitorHeight / 2 - height / 2) - Convert.ToInt16(proc.Value['b']), Convert.ToInt16(width), Convert.ToInt16(height) + Convert.ToInt16(proc.Value['b']), 0x0400);
+                                    SetWindowPos(process.MainWindowHandle, 0, Convert.ToInt16(monitorWidth / 2 - width / 2 - Convert.ToInt16(temp[0])), Convert.ToInt16(monitorHeight / 2 - height / 2 - Convert.ToInt16(temp[1])), Convert.ToInt16(width) + Convert.ToInt16(temp[2]), Convert.ToInt16(height) + Convert.ToInt16(temp[3]), 0x0400);
                                     ShowWindow(process.MainWindowHandle, 5);
                                     if (config["debug"] == "true")
                                     {
@@ -119,7 +121,7 @@ namespace BoWind
                                 }
                                 if (config["debug"] == "true")
                                 {
-                                    Console.WriteLine(proc.Key + " compat "  + proc.Value['c'] + " " + item.Key + " " + Convert.ToInt32(monitorWidth / 2 - width / 2) + " " + Convert.ToInt16(monitorHeight / 2 - height / 2) + " - " + proc.Value['b'] + " " + width + " " + height + " + " + proc.Value['b'] + "\n");
+                                    Console.WriteLine(value['n'] + " compat " + value['c'] + " " + item.Key + " " + Convert.ToInt32(monitorWidth / 2 - width / 2) + " - " + temp[0] + " " + Convert.ToInt16(monitorHeight / 2 - height / 2) + " - " + temp[1] + " " + width + " + " + temp[2] + " " + height + " + " + temp[3] + "\n");
                                 }
                             }
                         }
@@ -153,16 +155,12 @@ namespace BoWind
             int checkInt;
             bool checkBool;
             config = new Dictionary<string, string>();
-            programs = new Dictionary<double, Dictionary<string, Dictionary<char, string>>>();
+            programs = new Dictionary<double, List<Dictionary<char, string>>>();
             config.Add("debug", "false");
             config.Add("background", "false");
             config.Add("backgroundcolor", "000000");
             foreach (string line in File.ReadAllLines("config.txt"))
             {
-                if (line[0] == '/' && line[1] == '/' || line.Length == 0)
-                {
-                    break;
-                }
                 string[] temp = line.Split(' ');
                 if (config.ContainsKey(temp[0]))
                 {
@@ -190,34 +188,30 @@ namespace BoWind
             }
             foreach (string line in File.ReadAllLines("programs.txt"))
             {
-                if (line[0] == '/' && line[1] == '/' || line.Length == 0)
-                {
-                    break;
-                }
                 string[] temp = line.Split(':');
-                programs.Add(Convert.ToDouble(temp[0]) / Convert.ToDouble(temp[1]), new Dictionary<string, Dictionary<char, string>>());
+                programs.Add(Convert.ToDouble(temp[0]) / Convert.ToDouble(temp[1]), new List<Dictionary<char, string>>());
                 for (int i = 2; i < temp.Length; i++)
                 {
                     string[] values = temp[i].Split('.');
-                    programs[Convert.ToDouble(temp[0]) / Convert.ToDouble(temp[1])].Add(values[0], new Dictionary<char, string>() { { 'b', "0" }, { 'c', "false" } });
-                    for (int j = 1; j < values.Length; j++)
+                    programs[Convert.ToDouble(temp[0]) / Convert.ToDouble(temp[1])].Add(new Dictionary<char, string> { { 'c', "false" }, { 'n', "default" }, { 's', "0,0,0,0" } });
+                    for (int j = 0; j < values.Length; j++)
                     {
-                        if (values[j].Split('/')[0].Length == 1)
+                        if (values[j].Split(' ').Length == 2)
                         {
-                            if (programs[Convert.ToDouble(temp[0]) / Convert.ToDouble(temp[1])][values[0]].ContainsKey(Convert.ToChar(values[j].Split('/')[0])))
+                            if (programs[Convert.ToDouble(temp[0]) / Convert.ToDouble(temp[1])][i - 2].ContainsKey(Convert.ToChar(values[j].Split(' ')[0])))
                             {
-                                programs[Convert.ToDouble(temp[0]) / Convert.ToDouble(temp[1])][values[0]][Convert.ToChar(values[j].Split('/')[0])] = values[j].Split('/')[1];
+                                programs[Convert.ToDouble(temp[0]) / Convert.ToDouble(temp[1])][i - 2][Convert.ToChar(values[j].Split(' ')[0])] = values[j].Split(' ')[1];
                             }
                         }
                     }
-                    if (!int.TryParse(programs[Convert.ToDouble(temp[0]) / Convert.ToDouble(temp[1])][values[0]]['b'], out checkInt))
+                    if (programs[Convert.ToDouble(temp[0]) / Convert.ToDouble(temp[1])][i - 2]['s'].Split(',').Length < 4 || !int.TryParse(programs[Convert.ToDouble(temp[0]) / Convert.ToDouble(temp[1])][i - 2]['s'].Split(',')[0], out checkInt) || !int.TryParse(programs[Convert.ToDouble(temp[0]) / Convert.ToDouble(temp[1])][i - 2]['s'].Split(',')[1], out checkInt) || !int.TryParse(programs[Convert.ToDouble(temp[0]) / Convert.ToDouble(temp[1])][i - 2]['s'].Split(',')[2], out checkInt) || !int.TryParse(programs[Convert.ToDouble(temp[0]) / Convert.ToDouble(temp[1])][i - 2]['s'].Split(',')[3], out checkInt))
                     {
-                        programs[Convert.ToDouble(temp[0]) / Convert.ToDouble(temp[1])][values[0]]['b'] = "0";
+                        programs[Convert.ToDouble(temp[0]) / Convert.ToDouble(temp[1])][i - 2]['s'] = "0,0,0,0";
                         MessageBox.Show("Border shift options for " + values[0] + " ignored.");
                     }
-                    if (!bool.TryParse(programs[Convert.ToDouble(temp[0]) / Convert.ToDouble(temp[1])][values[0]]['c'], out checkBool))
+                    if (!bool.TryParse(programs[Convert.ToDouble(temp[0]) / Convert.ToDouble(temp[1])][i - 2]['c'], out checkBool))
                     {
-                        programs[Convert.ToDouble(temp[0]) / Convert.ToDouble(temp[1])][values[0]]['c'] = "false";
+                        programs[Convert.ToDouble(temp[0]) / Convert.ToDouble(temp[1])][i - 2]['c'] = "false";
                         MessageBox.Show("Compatibility options for " + values[0] + " ignored.");
                     }
                 }
