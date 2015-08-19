@@ -22,7 +22,7 @@ This is where you'll put your config settings, all entries are "option setting".
 
 programs.txt
 
-This is where you'll put your program settings, all entries start with an aspect ration then process names and options separeated by ':'. Options are "option/setting". Currently supported options are b and c which are vertical shift (integer) and compatibility mode (bool) respectively. Compatibility mode grabs all related processes and resizes those instead of just the mainwindowhandle, this helps with some games but you'll probably never need to use it. Vertical shift moves the application up and increases the height in order to combat borderless games that won't draw to where the titlebar used to be.
+This is where you'll put your program settings, all entries are "aspect ratio width:aspect ratio height:process name.option/setting". Currently supported options are b and c which are vertical shift (integer) and compatibility mode (bool) respectively. Compatibility mode grabs all related processes and resizes those instead of just the mainwindowhandle, this helps with some games but you'll probably never need to use it. Vertical shift moves the application up and increases the height in order to combat borderless games that won't draw to where the titlebar used to be.
 
     16:9:DarkSoulsII:RustClient:DOMO
     632:473:endless.b/25.c/true
