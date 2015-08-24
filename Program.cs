@@ -95,6 +95,7 @@ namespace BoWind
                                         GetWindowText(hand, stringBuilder, stringBuilder.Capacity);
                                         if (stringBuilder.ToString() != "" && stringBuilder.ToString() != "Default IME" && stringBuilder.ToString() != "MSCTFIME UI")
                                         {
+                                            ShowWindow(process.MainWindowHandle, 9);
                                             SetWindowLong(hand, -16, 0x0008 | 0x00C);
                                             SetWindowPos(hand, 0, Convert.ToInt16(monitorWidth / 2 - width / 2 - Convert.ToInt16(shift[0])), Convert.ToInt16(monitorHeight / 2 - height / 2 - Convert.ToInt16(shift[1])), Convert.ToInt16(width) + Convert.ToInt16(shift[2]), Convert.ToInt16(height) + Convert.ToInt16(shift[3]), 0x0400);
                                             ShowWindow(hand, 5);
@@ -108,6 +109,7 @@ namespace BoWind
                             }
                             else
                             {
+                                ShowWindow(process.MainWindowHandle, 9);
                                 SetWindowLong(process.MainWindowHandle, -16, 0x0008 | 0x00C);
                                 SetWindowPos(process.MainWindowHandle, 0, Convert.ToInt16(monitorWidth / 2 - width / 2 - Convert.ToInt16(shift[0])), Convert.ToInt16(monitorHeight / 2 - height / 2 - Convert.ToInt16(shift[1])), Convert.ToInt16(width) + Convert.ToInt16(shift[2]), Convert.ToInt16(height) + Convert.ToInt16(shift[3]), 0x0400);
                                 ShowWindow(process.MainWindowHandle, 5);
